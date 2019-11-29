@@ -1,56 +1,104 @@
 package main
 
 import (
+	"encoding/hex"
+	"flag"
+	"fmt"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 	"log"
+	"math/rand"
+	"os"
+)
+
+// TODO Create new topics option
+
+var (
+	producer = flag.Bool("produce", false, "Start producer")
+	consumer = flag.Bool("consume", false, "Start consumer")
+	group    = flag.String("group", "", "Set group for consumer")
+	topic    = flag.String("topic", "", "Set topic")
+	broker   = flag.String("broker", "localhost:9092", "Address of broker")
+	number   = flag.Int("number", -1, "Number of messages to produce")
+	length   = flag.Int("length", -1, "Length of a single message")
 )
 
 func main() {
-	//log.Println("Starting")
-	//go listen("client-1")
-	//go listen("client-2")
-	//
-	//time.Sleep(1000000 * 1000 * 10)
-	//
-	//go listen("client-3 / new")
-	//
-	//for {
-	//	time.Sleep(1000 * 1000 * 3600)
-	//}
+	initFlags()
 
-	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost"})
+	if *producer {
+		log.Println("Starting producer")
+		produce(*broker, *number, *length, *topic, *group)
+		log.Println("Finished producer")
+		return
+	}
+
+	if *consumer {
+		log.Println("Consumer")
+		return
+	}
+}
+
+func initFlags() {
+	flag.Parse()
+
+	if !*producer && !*consumer {
+		fmt.Println("Choose operation (-produce or -consume)")
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	if broker == nil {
+		fmt.Println("Broker missing")
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	if topic == nil {
+		fmt.Println("Topic missing")
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	if group == nil {
+		fmt.Println("Group missing")
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	if *number == -1 {
+		fmt.Println("Number missing")
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	if *length == -1 {
+		fmt.Println("Length missing")
+		flag.Usage()
+		os.Exit(1)
+	}
+}
+
+func produce(broker string, number int, length int, topic string, group string) {
+	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": broker})
 	if err != nil {
 		panic(err)
 	}
-
 	defer p.Close()
 
-	// Delivery report handler for produced messages
-	go func() {
-		for e := range p.Events() {
-			switch ev := e.(type) {
-			case *kafka.Message:
-				if ev.TopicPartition.Error != nil {
-					log.Printf("Delivery failed: %v\n", ev.TopicPartition)
-				} else {
-					log.Printf("Delivered message to %v\n", ev.TopicPartition)
-				}
-			}
+	// Fire and forget for now.
+	for i := 1; i <= number; i++ {
+		if i%(number/10) == 0 {
+			log.Printf("Sending message %d/%d\n", i, number)
 		}
-	}()
-
-	// Produce messages to topic (asynchronously)
-	topic := "topic4"
-	for _, word := range []string{"Welcome", "to", "the", "Confluent", "Kafka", "Golang", "client"} {
-		p.Produce(&kafka.Message{
+		bytes := hex.EncodeToString(newRandomBytes(length))
+		err := p.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-			Value:          []byte(word),
+			Value:          []byte(bytes),
 		}, nil)
+		if err != nil {
+			panic(err)
+		}
 	}
-
-	// Wait for message deliveries before shutting down
-	left := p.Flush(15 * 1000)
-	log.Println("Left events:", left)
 }
 
 func listen(name string) {
@@ -74,4 +122,14 @@ func listen(name string) {
 		}
 	}
 	c.Close()
+}
+
+// newRandomBytes returns a new random array with the given length in bytes.
+func newRandomBytes(length int) []byte {
+	bs := make([]byte, length)
+	_, err := rand.Read(bs)
+	if err != nil {
+		panic(err)
+	}
+	return bs
 }
