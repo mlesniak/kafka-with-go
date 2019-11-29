@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	kafka "github.com/Shopify/sarama"
 )
 
 func main() {
 	config := kafka.NewConfig()
+	config.Version = kafka.MaxVersion
 	client, err := kafka.NewClient([]string{":9092"}, config)
 	if err != nil {
 		panic(err)
@@ -14,6 +16,7 @@ func main() {
 
 	// producer(client)
 	consumer(client)
+	//consumerGroup(client)
 }
 
 func producer(client kafka.Client) {
@@ -24,8 +27,25 @@ func producer(client kafka.Client) {
 	}
 	producer.Input() <- &m
 	// TODO Read error channel to prevent blocking
-	
+
 	producer.Close()
+}
+
+func consumerGroup(client kafka.Client) {
+	v := client.Config().Version
+	fmt.Println(v)
+
+	group, err := kafka.NewConsumerGroupFromClient("readers", client)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("--- Messages")
+	ctx := context.Background()
+	err = group.Consume(ctx, []string{"topic"}, groupHandler{})
+	if err != nil {
+		panic(err)
+	}
 }
 
 func consumer(client kafka.Client) {
@@ -50,4 +70,16 @@ func consumer(client kafka.Client) {
 	for m := range messages {
 		fmt.Println(string(m.Value))
 	}
+}
+
+type groupHandler struct{}
+
+func (groupHandler) Setup(_ kafka.ConsumerGroupSession) error   { return nil }
+func (groupHandler) Cleanup(_ kafka.ConsumerGroupSession) error { return nil }
+func (h groupHandler) ConsumeClaim(sess kafka.ConsumerGroupSession, claim kafka.ConsumerGroupClaim) error {
+	for msg := range claim.Messages() {
+		fmt.Printf("Message topic:%q partition:%d offset:%d value:%s\n", msg.Topic, msg.Partition, msg.Offset, string(msg.Value))
+		sess.MarkMessage(msg, "")
+	}
+	return nil
 }
