@@ -14,7 +14,11 @@ func main() {
 		panic(err)
 	}
 
-	producer, err := kafka.NewAsyncProducerFromClient(client)
+	producer(client)
+}
+
+func producer(client kafka.Client) {
+	producer, _ := kafka.NewAsyncProducerFromClient(client)
 	m := kafka.ProducerMessage{
 		Topic: "topic",
 		Value: kafka.StringEncoder("Hello, + ${time.Now()}"),
