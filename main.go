@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"log"
+
+	//"context"
 	"fmt"
 	kafka "github.com/Shopify/sarama"
 )
@@ -15,8 +18,8 @@ func main() {
 	}
 
 	// producer(client)
-	consumer(client)
-	//consumerGroup(client)
+	//consumer(client)
+	consumerGroup(client)
 }
 
 func producer(client kafka.Client) {
@@ -42,9 +45,13 @@ func consumerGroup(client kafka.Client) {
 
 	fmt.Println("--- Messages")
 	ctx := context.Background()
-	err = group.Consume(ctx, []string{"topic"}, groupHandler{})
-	if err != nil {
-		panic(err)
+	for {
+		// Simulate two consumer.
+		go func() {
+			fmt.Println("Starting parallel consumer")
+			group.Consume(ctx, []string{"topic4"}, groupHandler{"client 0"})
+		}()
+		group.Consume(ctx, []string{"topic4"}, groupHandler{"client 1"})
 	}
 }
 
@@ -60,7 +67,7 @@ func consumer(client kafka.Client) {
 		fmt.Println(value)
 	}
 
-	part, err := consumer.ConsumePartition("topic", 0, kafka.OffsetOldest)
+	part, err := consumer.ConsumePartition("topic4", 0, kafka.OffsetOldest)
 	if err != nil {
 		panic(err)
 	}
@@ -72,14 +79,24 @@ func consumer(client kafka.Client) {
 	}
 }
 
-type groupHandler struct{}
+type groupHandler struct {
+	Name string
+}
 
-func (groupHandler) Setup(_ kafka.ConsumerGroupSession) error   { return nil }
+func (g groupHandler) Setup(session kafka.ConsumerGroupSession) error {
+	fmt.Println("Started", g.Name)
+	fmt.Println("Claims:", session.Claims())
+	return nil
+}
 func (groupHandler) Cleanup(_ kafka.ConsumerGroupSession) error { return nil }
 func (h groupHandler) ConsumeClaim(sess kafka.ConsumerGroupSession, claim kafka.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		fmt.Printf("Message topic:%q partition:%d offset:%d value:%s\n", msg.Topic, msg.Partition, msg.Offset, string(msg.Value))
 		sess.MarkMessage(msg, "")
+		if sess.Context().Err() != nil {
+			log.Println("Context switch")
+			return nil
+		}
 	}
 	return nil
 }
