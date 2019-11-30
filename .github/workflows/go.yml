@@ -16,7 +16,7 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
 
-    - name: Build libraru dependency
+    - name: Build library dependency
       run: |
         git clone https://github.com/edenhill/librdkafka.git
         cd librdkafka
