@@ -9,3 +9,6 @@ TODO Write documentation :-)
 - describe commands
 - Motivate framework choice
 
+## License
+
+As always, the source code is licensed under [Apache license 2.0](https://raw.githubusercontent.com/mlesniak/kafka-with-go/master/LICENSE).
