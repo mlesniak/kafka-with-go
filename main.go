@@ -23,4 +23,11 @@ func main() {
 		log.Println("Finished consumer")
 		return
 	}
+
+	if *create {
+		log.Println("Starting topic creation")
+		createTopic(*broker, *topic, *partitions)
+		log.Println("Finished topic creation")
+		return
+	}
 }
