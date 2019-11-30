@@ -10,6 +10,7 @@ var (
 	producer = flag.Bool("produce", false, "Start producer")
 	consumer = flag.Bool("consume", false, "Start consumer")
 	create   = flag.Bool("create", false, "Create a new topic")
+	list     = flag.Bool("list", false, "List available topics")
 	group    = flag.String("group", "", "Set group for consumer")
 	topic    = flag.String("topic", "", "Set topic")
 	//offset     = flag.String("offset", "end", "One of [beginning, end]")
@@ -23,7 +24,7 @@ var (
 func initFlags() {
 	flag.Parse()
 
-	if !*producer && !*consumer && !*create {
+	if !*producer && !*consumer && !*create && !*list {
 		fmt.Println("Choose operation (-produce or -consume or -create)")
 		end()
 	}
@@ -33,7 +34,7 @@ func initFlags() {
 		end()
 	}
 
-	if topic == nil {
+	if (*producer || *consumer || *create) && topic == nil {
 		fmt.Println("Topic missing")
 		end()
 	}

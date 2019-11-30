@@ -1,6 +1,7 @@
 package main
 
 import (
+	"golang.org/x/tools/container/intsets"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 	"log"
 )
@@ -30,4 +31,22 @@ func consume(broker string, topic string, group string, number int) {
 	}
 	_ = c.Close()
 	log.Printf("Consumer read %d entries\n", number)
+}
+
+func listTopics(broker string) {
+	c, err := kafka.NewConsumer(&kafka.ConfigMap{
+		"bootstrap.servers": broker,
+		"group.id":          "",
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	metadata, err := c.GetMetadata(nil, false, intsets.MaxInt)
+	if err != nil {
+		panic(err)
+	}
+	for topic, value := range metadata.Topics {
+		log.Printf("%s /%d\n", topic, len(value.Partitions))
+	}
 }

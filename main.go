@@ -30,4 +30,10 @@ func main() {
 		log.Println("Finished topic creation")
 		return
 	}
+
+	if *list {
+		log.Println("Listing topics")
+		listTopics(*broker)
+		return
+	}
 }
