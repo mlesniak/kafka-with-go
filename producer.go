@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/hex"
-	"golang.org/x/tools/container/intsets"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 	"log"
+	"math"
 	"math/rand"
 )
 
@@ -15,13 +15,7 @@ func produce(broker string, number int, length int, topic string, group string) 
 	}
 	defer p.Close()
 
-	// Fire and forget for now.
 	for i := 1; i <= number; i++ {
-		if i%*tick == 0 {
-			// Wait until everything has been sent.
-			p.Flush(intsets.MaxInt)
-			log.Printf("Sending message %d/%d\n", i, number)
-		}
 		bytes := hex.EncodeToString(newRandomBytes(length))
 		err := p.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
@@ -30,7 +24,22 @@ func produce(broker string, number int, length int, topic string, group string) 
 		if err != nil {
 			panic(err)
 		}
+
+		e := <-p.Events()
+		m := e.(*kafka.Message)
+		if m.TopicPartition.Error != nil {
+			log.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
+		} else {
+			if i%*tick == 0 {
+				// Wait until everything has been sent.
+				log.Printf("Sending message %d/%d\n", i, number)
+				//log.Printf("Delivered message to topic %s [%d] at offset %v\n",
+				//	*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
+			}
+		}
 	}
+
+	p.Flush(math.MaxInt64)
 }
 
 // newRandomBytes returns a new random array with the given length in bytes.
