@@ -31,10 +31,7 @@ func produce(broker string, number int, length int, topic string, group string) 
 			log.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
 		} else {
 			if i%*tick == 0 {
-				// Wait until everything has been sent.
 				log.Printf("Sending message %d/%d\n", i, number)
-				//log.Printf("Delivered message to topic %s [%d] at offset %v\n",
-				//	*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
 			}
 		}
 	}
