@@ -59,7 +59,46 @@ environments, e.g. in docker compose or kubernetes; a corresponding `docker-comp
     docker-compose up
     docker-compose exec go ash
     
-and use the aforementioned `kafka-with-go` commands in the provided shell.    
+and use the aforementioned `kafka-with-go` commands in the provided shell. 
+
+## Full example
+
+    # Create topic
+    $ kafka-with-go -create -topic github -partitions 4
+    2019/12/01 13:37:16 Starting topic creation
+    2019/12/01 13:37:16 Creating topic github with 4 partitions
+    2019/12/01 13:37:16 Finished topic creation
+    
+    # Add 1k messages with length 128bytes each; rather slow on my old machine ¯\_(ツ)_/¯ ... 
+    $ kafka-with-go -produce -topic github -number 1000 -length 128 -tick 100
+    2019/12/01 13:38:05 Starting producer
+    2019/12/01 13:38:05 Sending message 100/1000
+    2019/12/01 13:38:06 Sending message 200/1000
+    2019/12/01 13:38:06 Sending message 300/1000
+    2019/12/01 13:38:07 Sending message 400/1000
+    2019/12/01 13:38:07 Sending message 500/1000
+    2019/12/01 13:38:07 Sending message 600/1000
+    2019/12/01 13:38:08 Sending message 700/1000
+    2019/12/01 13:38:08 Sending message 800/1000
+    2019/12/01 13:38:09 Sending message 900/1000
+    2019/12/01 13:38:09 Sending message 1000/1000
+    2019/12/01 13:38:09 Finished producer
+    
+    # Consume 1k messages
+    $ kafka-with-go -consume -topic github -number 1000 -tick 100 -group 1
+    2019/12/01 13:39:06 Starting consumer
+    2019/12/01 13:39:10 Received 100 messages (100 new)
+    2019/12/01 13:39:10 Received 200 messages (100 new)
+    2019/12/01 13:39:10 Received 300 messages (100 new)
+    2019/12/01 13:39:10 Received 400 messages (100 new)
+    2019/12/01 13:39:10 Received 500 messages (100 new)
+    2019/12/01 13:39:10 Received 600 messages (100 new)
+    2019/12/01 13:39:10 Received 700 messages (100 new)
+    2019/12/01 13:39:10 Received 800 messages (100 new)
+    2019/12/01 13:39:10 Received 900 messages (100 new)
+    2019/12/01 13:39:10 Received 1000 messages (100 new)
+    2019/12/01 13:39:10 Consumer read 1000 entries
+    2019/12/01 13:39:10 Finished consumer   
 
 ## License
 
