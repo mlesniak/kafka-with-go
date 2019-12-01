@@ -1,3 +1,5 @@
+// Produces new messages by submitting them to the topic. Note that currently, random messages of a fixed length
+// are sent.
 package main
 
 import (

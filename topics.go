@@ -1,3 +1,4 @@
+// Create a new topic.
 package main
 
 import (
@@ -22,5 +23,8 @@ func createTopic(broker string, topic string, partitions int) {
 		Config:            nil,
 	}
 	log.Printf("Creating topic %s with %d partitions\n", topic, partitions)
-	client.CreateTopics(ctx, []kafka.TopicSpecification{spec}, nil)
+	_, err = client.CreateTopics(ctx, []kafka.TopicSpecification{spec}, nil)
+	if err != nil {
+		panic(err)
+	}
 }

@@ -1,3 +1,5 @@
+// Consume submitted messages and list available topics (since both are consume-operations, we define them in the
+// same file). Note that we discard the messages for now.
 package main
 
 import (

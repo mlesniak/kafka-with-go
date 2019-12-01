@@ -1,11 +1,10 @@
+// Playground examples for using kafka with go. The general workflow is as follows: 1) create topic 2) check success
+// by listing it 3) produce some data and 4) consume data.
 package main
 
 import (
 	"log"
 )
-
-// TODO Create new topics option
-// TODO Refactoring
 
 func main() {
 	initFlags()

@@ -1,3 +1,4 @@
+// Handle command line parsing.
 package main
 
 import (
@@ -21,6 +22,8 @@ var (
 	partitions = flag.Int("partitions", 1, "Number of partitions")
 )
 
+// getBroker returns the broker to use. By default it uses localhost for development systems, but if an environment
+// variable BROKER exists, it is used instead.
 func getBroker() string {
 	broker, ok := os.LookupEnv("BROKER")
 	if ok {
@@ -30,6 +33,7 @@ func getBroker() string {
 	return "localhost:9092"
 }
 
+// initFlags checks correct set of command line flags for the different operations.
 func initFlags() {
 	flag.Parse()
 
