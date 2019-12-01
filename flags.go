@@ -14,12 +14,20 @@ var (
 	group    = flag.String("group", "", "Set group for consumer")
 	topic    = flag.String("topic", "", "Set topic")
 	//offset     = flag.String("offset", "end", "One of [beginning, end]")
-	broker     = flag.String("broker", "localhost:9092", "Address of broker")
+	broker     = flag.String("broker", getBroker(), "Address of broker")
 	number     = flag.Int("number", -1, "Number of messages to produce")
 	length     = flag.Int("length", -1, "Length of a single message")
 	tick       = flag.Int("tick", 1000, "Produce a log message every <tick> messages")
 	partitions = flag.Int("partitions", 1, "Number of partitions")
 )
+
+func getBroker() string {
+	broker, ok := os.LookupEnv("BROKER")
+	if ok {
+		return broker
+	}
+	return "localhost:9092"
+}
 
 func initFlags() {
 	flag.Parse()
