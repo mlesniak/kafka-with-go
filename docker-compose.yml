@@ -1,0 +1,25 @@
+version: '2'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+
+  kafka:
+    build:
+      context: kafka/
+      dockerfile: Dockerfile
+    ports:
+      - "9092:9092"
+    environment:
+      # Change this for other systems, e.g. linux.
+      KAFKA_ADVERTISED_HOST_NAME: docker.for.mac.localhost
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  go:
+    build: .
+    environment:
+      BROKER: kafka:9092
+    command: sleep 1024d

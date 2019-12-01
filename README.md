@@ -52,6 +52,10 @@ There are optional additional flags you can specify, e.g.
 The (multi-stage) `Dockerfile` builds a container without external dependencies, which can then be used in arbitrary
 environments, e.g. in docker compose or kubernetes; a corresponding `docker-compose.yml` is provided. Use it as follows: 
 
+    docker-compose up
+    docker-compose exec go ash
+    
+and use the aforementioned `kafka-with-go` commands in the provided shell.    
 
 ## License
 
