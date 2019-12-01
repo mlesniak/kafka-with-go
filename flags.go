@@ -44,7 +44,7 @@ func initFlags() {
 		end()
 	}
 
-	if (*producer || *consumer) && *number == -1 {
+	if *producer && *number == -1 {
 		fmt.Println("Number missing")
 		end()
 	}

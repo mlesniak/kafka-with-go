@@ -19,7 +19,7 @@ func consume(broker string, topic string, group string, number int) {
 
 	_ = c.SubscribeTopics([]string{topic}, nil)
 
-	for counter := 1; counter <= number; counter++ {
+	for counter := 1; number == -1 || counter <= number; counter++ {
 		msg, err := c.ReadMessage(-1)
 		if err == nil {
 			if counter%*tick == 0 {
