@@ -3,17 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 )
 
 var (
-	producer = flag.Bool("produce", false, "Start producer")
-	consumer = flag.Bool("consume", false, "Start consumer")
-	create   = flag.Bool("create", false, "Create a new topic")
-	list     = flag.Bool("list", false, "List available topics")
-	group    = flag.String("group", "", "Set group for consumer")
-	topic    = flag.String("topic", "", "Set topic")
-	//offset     = flag.String("offset", "end", "One of [beginning, end]")
+	producer   = flag.Bool("produce", false, "Start producer")
+	consumer   = flag.Bool("consume", false, "Start consumer")
+	create     = flag.Bool("create", false, "Create a new topic")
+	list       = flag.Bool("list", false, "List available topics")
+	group      = flag.String("group", "", "Set group for consumer")
+	topic      = flag.String("topic", "", "Set topic")
 	broker     = flag.String("broker", getBroker(), "Address of broker")
 	number     = flag.Int("number", -1, "Number of messages to produce")
 	length     = flag.Int("length", -1, "Length of a single message")
@@ -24,6 +24,7 @@ var (
 func getBroker() string {
 	broker, ok := os.LookupEnv("BROKER")
 	if ok {
+		log.Printf("Using broker from environment %s\n", broker)
 		return broker
 	}
 	return "localhost:9092"
