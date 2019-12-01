@@ -24,7 +24,7 @@ var (
 func getBroker() string {
 	broker, ok := os.LookupEnv("BROKER")
 	if ok {
-		log.Printf("Using broker from environment %s\n", broker)
+		log.Printf("Using broker from environment variable BROKER: %s\n", broker)
 		return broker
 	}
 	return "localhost:9092"
