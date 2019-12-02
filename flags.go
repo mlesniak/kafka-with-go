@@ -3,7 +3,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 )
@@ -37,39 +36,25 @@ func getBroker() string {
 func initFlags() {
 	flag.Parse()
 
-	if !*producer && !*consumer && !*create && !*list {
-		fmt.Println("Choose operation (-produce or -consume or -create)")
-		end()
+	type flagRule struct {
+		condition bool
+		message   string
 	}
 
-	if broker == nil {
-		fmt.Println("Broker missing")
-		end()
+	rules := []flagRule{
+		{!*producer && !*consumer && !*create && !*list, "Choose operation (-produce or -consume or -create)"},
+		{broker == nil, "Broker missing"},
+		{(*producer || *consumer || *create) && topic == nil, "Topic missing"},
+		{*consumer && *group == "", "Group missing"},
+		{*producer && *number == -1, "Number missing"},
+		{*producer && *length == -1, "Length missing"},
 	}
 
-	if (*producer || *consumer || *create) && topic == nil {
-		fmt.Println("Topic missing")
-		end()
+	for _, rule := range rules {
+		if rule.condition {
+			log.Println(rule.message + "\n")
+			flag.Usage()
+			os.Exit(1)
+		}
 	}
-
-	if *consumer && *group == "" {
-		fmt.Println("Group missing")
-		end()
-	}
-
-	if *producer && *number == -1 {
-		fmt.Println("Number missing")
-		end()
-	}
-
-	if *producer && *length == -1 {
-		fmt.Println("Length missing")
-		end()
-	}
-}
-
-func end() {
-	fmt.Println("")
-	flag.Usage()
-	os.Exit(1)
 }
