@@ -7,7 +7,10 @@
 
 This is a small playground example for using Apache Kafka with Go. Initially, I used [Shopify's samara](https://github.com/Shopify/sarama)
 library but switched
-to [Confluent's kafka](https://github.com/confluentinc/confluent-kafka-go) library due to easier use and more examples. Currently, you can create and list topics and inject random
+to [Confluent's kafka](https://github.com/confluentinc/confluent-kafka-go) library due to easier use and more examples. Note that my final opinion has not been
+fully set, yet.
+ 
+ Currently, you can create and list topics and inject random
 messages  of pre-defined length and size as well as consume them (see below).
 
 ## Build
